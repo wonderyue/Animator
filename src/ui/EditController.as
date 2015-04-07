@@ -1,15 +1,21 @@
 package ui
 {
-	import flash.display.DisplayObject;
-	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
+	import flash.events.MouseEvent;
+	import flash.events.TextEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
+	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.core.UIComponent;
 	
+	import spark.components.Button;
+	import spark.components.DropDownList;
+	import spark.components.HGroup;
+	import spark.components.TextInput;
 	import spark.components.VGroup;
+	import spark.events.IndexChangeEvent;
 
 	public class EditController
 	{
@@ -52,6 +58,109 @@ package ui
 			}
 			m_curArrow = value;
 			value.isSelected = true;
+			updateInspector(m_curArrow);
+		}
+		
+		private function updateInspector(transition:AnimTransition):void
+		{
+			m_inspector.removeAllElements();
+			for (var i:int = 0; i < transition.conditionArray.length; i++)
+			{
+				var element:Condition = transition.conditionArray[i] as Condition;
+				m_inspector.addElement(createConditionContent(element));
+			}
+			var hGroup:HGroup = new HGroup();
+			var add:Button = new Button();
+			add.width = 50;
+			add.label = "+";
+			add.addEventListener(MouseEvent.CLICK, function(e:MouseEvent){
+				transition.addCondition();
+				updateInspector(transition);
+			});
+			var remove:Button = new Button();
+			remove.width = 50;
+			remove.label = "-";
+			remove.addEventListener(MouseEvent.CLICK, function(e:MouseEvent){
+				transition.conditionArray.pop();
+				updateInspector(transition);
+			});
+			hGroup.addElement(add);
+			hGroup.addElement(remove);
+			m_inspector.addElement(add);
+		}
+		
+		private function createConditionContent(condition:Condition):HGroup
+		{
+			var hGroup:HGroup = new HGroup();
+			var input:TextInput = new TextInput();
+			input.width = 50;
+			var type:DropDownList = new DropDownList();
+			type.dataProvider = new ArrayCollection([  
+				{id:Condition.TYPE_BOOL,label:'bool'},  
+				{id:Condition.TYPE_NUMBER,label:'number'},  
+				{id:Condition.TYPE_TRIGGER,label:'trigger'}  
+			]); 
+			type.width = 80;
+			type.selectedIndex = condition.type;
+			type.addEventListener(IndexChangeEvent.CHANGING,function(e:IndexChangeEvent){
+				condition.type = e.newIndex;
+				switch(e.newIndex)
+				{
+					case Condition.TYPE_BOOL:
+					{
+						var logic:DropDownList = new DropDownList();
+						logic.dataProvider = new ArrayCollection([  
+							{id:Condition.LOGIC_EQUAL,label:'='},  
+							{id:Condition.LOGIC_GREATER,label:'>'},  
+							{id:Condition.LOGIC_LESS,label:'<'},  
+							{id:Condition.LOGIC_NOTEQUAL,label:'≠'}
+						]); 
+						logic.width = 80;
+						logic.addEventListener(IndexChangeEvent.CHANGING,function(e:IndexChangeEvent){
+							condition.logic = e.newIndex;
+						})
+						hGroup.addElement(logic);
+						condition.logic = Condition.LOGIC_EQUAL;
+						break;
+					}
+					case Condition.TYPE_NUMBER:
+					{
+						var logic:DropDownList = new DropDownList();
+						logic.dataProvider = new ArrayCollection([  
+							{id:Condition.LOGIC_EQUAL,label:'='},  
+							{id:Condition.LOGIC_GREATER,label:'>'},  
+							{id:Condition.LOGIC_LESS,label:'<'},  
+							{id:Condition.LOGIC_NOTEQUAL,label:'≠'}
+						]); 
+						logic.width = 80;
+						logic.addEventListener(IndexChangeEvent.CHANGING,function(e:IndexChangeEvent){
+							condition.logic = e.newIndex;
+						});
+						var value:TextInput = new TextInput();
+						
+						value.width = 50;
+						value.addEventListener(TextEvent.TEXT_INPUT,function(e:TextEvent){
+							condition.value = e.text as int;
+						})
+						hGroup.addElement(value);
+						break;
+					}
+					case Condition.TYPE_TRIGGER:
+					{
+						
+						break;
+					}
+					default:
+					{
+						break;
+					}
+				}
+			});
+			var typeChangeEvent:IndexChangeEvent = new IndexChangeEvent("change",false,false,-1,condition.type);
+			type.dispatchEvent(typeChangeEvent);
+			hGroup.addElement(input);
+			hGroup.addElement(type);
+			return hGroup;
 		}
 
 		public function get editLayer():UIComponent

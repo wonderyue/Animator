@@ -27,6 +27,32 @@ package ui
 			m_conditionArray = new Array();
 		}
 		
+
+		public function get conditionArray():Array
+		{
+			return m_conditionArray;
+		}
+
+		public function addCondition():Condition
+		{
+			var condition:Condition = new Condition();
+			m_conditionArray.push(condition);
+			return condition;
+		}
+		
+		public function removeCondition(condition:Condition):void
+		{
+			for (var i:int = 0; i < m_conditionArray.length; i++)
+			{
+				var element:Condition = m_conditionArray[i] as Condition;
+				if (element == condition) 
+				{
+					m_conditionArray.splice(i,1);
+					return;
+				}
+			}
+		}
+		
 		public function get from():AnimState
 		{
 			return m_from;
