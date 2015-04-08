@@ -1,19 +1,19 @@
-package ui
+package com.wonder
 {
 	public class Condition
 	{
 		private var m_id:String = null;
 		private var m_type:int = -1;
-		private var m_value:int = -1;
+		private var m_value:int = 0;
 		private var m_logic:int = -1;
-		public static var TYPE_BOOL = 1;
-		public static var TYPE_NUMBER = 2;
-		public static var TYPE_TRIGGER = 3;
+		public static var TYPE_BOOL:int = 0;
+		public static var TYPE_NUMBER:int = 1;
+		public static var TYPE_TRIGGER:int = 2;
 		
-		public static var LOGIC_EQUAL = 1;
-		public static var LOGIC_GREATER = 2;
-		public static var LOGIC_LESS = 3;
-		public static var LOGIC_NOTEQUAL = 4;
+		public static var LOGIC_EQUAL:int = 0;
+		public static var LOGIC_GREATER:int = 1;
+		public static var LOGIC_LESS:int = 2;
+		public static var LOGIC_NOTEQUAL:int = 3;
 		
 		public function Condition()
 		{

@@ -1,24 +1,20 @@
-package ui
+package com.wonder
 {
 	import flash.display.Sprite;
 	import flash.events.ContextMenuEvent;
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
-	import flash.geom.Point;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
-	
 	import flashx.textLayout.formats.TextAlign;
-	
-	import spark.components.Button;
-	import spark.effects.Animate;
 	
 	public class AnimState extends DragSprite
 	{
 		private static var DEFAULT_COLOR:int = 0xFFD700;
 		private static var NORMAL_COLOR:int = 0xD3D3D3;
+		private static var ANYSTATE_COLOR:int = 0x66CDAA;
 		private var m_isDefaultState:Boolean = false;
 		
 		private var m_textField:TextField;
@@ -64,7 +60,7 @@ package ui
 		private function initSkin():void{
 			m_bg = new Sprite();
 			m_bg.graphics.clear();
-			m_bg.graphics.beginFill(NORMAL_COLOR);
+			m_bg.graphics.beginFill(id == "AnyState"?ANYSTATE_COLOR:NORMAL_COLOR);
 			m_bg.graphics.drawRoundRect(0,0,150,40,18,18);
 			m_bg.graphics.endFill();
 			addChild(m_bg);
@@ -90,14 +86,17 @@ package ui
 			var contextItem1:ContextMenuItem = new ContextMenuItem("Make Transition");
 			var contextItem2:ContextMenuItem = new ContextMenuItem("Set As Default");
 			var self:AnimState = this;
-			contextItem1.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(e:ContextMenuEvent){
+			contextItem1.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(e:ContextMenuEvent):void{
 				EditController.getInstance().makeTransition(self);
 			});
-			contextItem2.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(e:ContextMenuEvent){
+			contextItem2.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(e:ContextMenuEvent):void{
 				EditController.getInstance().setDefaultState(self);
 			});
 			contextMenu.customItems.push(contextItem1);
-			contextMenu.customItems.push(contextItem2);
+			if (id != "AnyState") 
+			{
+				contextMenu.customItems.push(contextItem2);
+			}
 			contextMenu.hideBuiltInItems();
 			this.contextMenu = contextMenu;
 		}

@@ -1,4 +1,4 @@
-package ui
+package com.wonder
 {
 	import flash.display.Sprite;
 	import flash.display.StageQuality;
