@@ -8,6 +8,7 @@ package com.wonder
 	public class DataParser
 	{
 		private static var FILETYPE_SKELETON:int = 1;
+		private static var FILETYPE_FSM:int = 2;
 		
 		private static function generateJson(stateArr:Array,transitionArr:Array):String
 		{
@@ -18,6 +19,8 @@ package com.wonder
 				var stateObj:Object = new Object();
 				stateObj.state = state.id;
 				stateObj.transition = new Array();
+				stateObj.x = state.x;
+				stateObj.y = state.y;
 				if (state.isDefaultState) 
 				{
 					stateObj.default = true;
@@ -28,9 +31,13 @@ package com.wonder
 					{
 						var transitionObj:Object = new Object();
 						transitionObj.nextState = transition.to.id;
-						transitionObj.condision = new Array();
+						transitionObj.condition = new Array();
 						for each (var condition:Condition in transition.conditionArray) 
 						{
+							if (condition.type == Condition.TYPE_COMPLETE) 
+							{
+								condition.id = Condition.COMPLETE_ID;
+							}
 							if (condition.id) 
 							{
 								var conditionObj:Object = new Object();
@@ -38,7 +45,7 @@ package com.wonder
 								conditionObj.type = condition.type;
 								conditionObj.logic = condition.logic;
 								conditionObj.value = condition.value;
-								transitionObj.condision.push(conditionObj);
+								transitionObj.condition.push(conditionObj);
 							}
 						}
 						stateObj.transition.push(transitionObj);
@@ -90,6 +97,45 @@ package com.wonder
 						EditController.getInstance().initStates(stateStrArr,obj.armature[0].animation.name);
 						break;
 					}
+					case FILETYPE_FSM:
+					{
+						var stateArr:Object = JSON.parse(content);
+						var stateStrArray:Array = new Array();
+						for each (var stateObj:Object in stateArr) 
+						{
+							if (stateObj.state != AnimState.ANYSTATE_ID) 
+							{
+								stateStrArray.push(stateObj.state);
+							}
+						}
+						EditController.getInstance().initStates(stateStrArray,fileToSave.name.split(".")[0]);
+						for each (var state:AnimState in EditController.getInstance().stateArray) 
+						{
+							for each (var stateObj:Object in stateArr) 
+							{
+								if (stateObj.state == state.id) 
+								{
+									state.x = stateObj.x;
+									state.y = stateObj.y;
+									for each (var transitionObj:Object in stateObj.transition) 
+									{
+										var transition:AnimTransition = EditController.getInstance().makeTransition(state,false);
+										transition.to = EditController.getInstance().getStateById(transitionObj.nextState);
+										for each (var conditionObj:Object in transitionObj.condition) 
+										{
+											var condition:Condition = transition.addCondition();
+											condition.id = conditionObj.id;
+											condition.type = conditionObj.type;
+											condition.logic = conditionObj.logic;
+											condition.value = conditionObj.value;
+										}
+									}
+								}
+								EditController.getInstance().updateArrow(state);
+							}
+						}
+						break;
+					}
 					default:
 					{
 						break;
@@ -106,6 +152,11 @@ package com.wonder
 		public static function parseSkeletonJson():void
 		{
 			readFile(FILETYPE_SKELETON);
+		}
+		
+		public static function parseFSMJson():void
+		{
+			readFile(FILETYPE_FSM);
 		}
 	}
 }

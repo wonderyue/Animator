@@ -12,6 +12,7 @@ package com.wonder
 	
 	public class AnimState extends DragSprite
 	{
+		public static var ANYSTATE_ID:String = "anyState";
 		private static var DEFAULT_COLOR:int = 0xFFD700;
 		private static var NORMAL_COLOR:int = 0xD3D3D3;
 		private static var ANYSTATE_COLOR:int = 0x66CDAA;
@@ -60,7 +61,7 @@ package com.wonder
 		private function initSkin():void{
 			m_bg = new Sprite();
 			m_bg.graphics.clear();
-			m_bg.graphics.beginFill(id == "AnyState"?ANYSTATE_COLOR:NORMAL_COLOR);
+			m_bg.graphics.beginFill(id == ANYSTATE_ID?ANYSTATE_COLOR:NORMAL_COLOR);
 			m_bg.graphics.drawRoundRect(0,0,150,40,18,18);
 			m_bg.graphics.endFill();
 			addChild(m_bg);
@@ -93,7 +94,7 @@ package com.wonder
 				EditController.getInstance().setDefaultState(self);
 			});
 			contextMenu.customItems.push(contextItem1);
-			if (id != "AnyState") 
+			if (id != ANYSTATE_ID) 
 			{
 				contextMenu.customItems.push(contextItem2);
 			}

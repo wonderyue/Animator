@@ -29,6 +29,7 @@ package com.wonder
 		private var m_arrowContainer:Sprite;
 		private var m_curArrow:AnimTransition = null;
 		private var m_skeletonName:String;
+		private var INPUT_ID:String = "input";
 		private var LOGIC_ID:String = "logic";
 		private var VALUE_ID:String = "value";
 		private var REMOVE_ID:String = "remove";
@@ -39,6 +40,11 @@ package com.wonder
 			m_inspector = inspector;
 			_instance = this;
 			initStates();
+		}
+
+		public function get stateArray():Array
+		{
+			return m_stateArray;
 		}
 
 		public function get skeletonName():String
@@ -63,51 +69,52 @@ package com.wonder
 				m_curArrow.isSelected = false;
 			}
 			m_curArrow = value;
-			value.isSelected = true;
+			if (value) 
+			{
+				value.isSelected = true;
+			}
 			updateInspector(m_curArrow);
 		}
 		
 		private function updateInspector(transition:AnimTransition):void
 		{
 			m_inspector.removeAllElements();
-			for (var i:int = 0; i < transition.conditionArray.length; i++)
+			if (transition) 
 			{
-				var element:Condition = transition.conditionArray[i] as Condition;
-				m_inspector.addElement(createConditionContent(element,transition));
+				for (var i:int = 0; i < transition.conditionArray.length; i++)
+				{
+					var element:Condition = transition.conditionArray[i] as Condition;
+					m_inspector.addElement(createConditionContent(element,transition));
+				}
+				var hGroup:HGroup = new HGroup();
+				var add:Button = new Button();
+				add.width = 150;
+				add.label = "+ Add Condition";
+				add.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void{
+					transition.addCondition();
+					updateInspector(transition);
+				});
+				hGroup.addElement(add);
+				m_inspector.addElement(add);
 			}
-			var hGroup:HGroup = new HGroup();
-			var add:Button = new Button();
-			add.width = 150;
-			add.label = "+ Add Condition";
-			add.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void{
-				transition.addCondition();
-				updateInspector(transition);
-			});
-			hGroup.addElement(add);
-			m_inspector.addElement(add);
 		}
 		
 		private function createConditionContent(condition:Condition,transition:AnimTransition):HGroup
 		{
 			var hGroup:HGroup = new HGroup();
-			var input:TextInput = new TextInput();
-			input.width = 50;
-			input.text = condition.id;
-			input.addEventListener(TextEvent.TEXT_INPUT,function(e:TextEvent):void{
-				condition.id = e.target.text + e.text;
-			})
+			
 			var type:DropDownList = new DropDownList();
-			type.dataProvider = new ArrayCollection([  
+			type.dataProvider = new ArrayCollection([
+				{id:Condition.TYPE_COMPLETE,label:'complete'},
 				{id:Condition.TYPE_BOOL,label:'bool'},  
 				{id:Condition.TYPE_NUMBER,label:'number'},  
-				{id:Condition.TYPE_TRIGGER,label:'trigger'}  
+				{id:Condition.TYPE_TRIGGER,label:'trigger'}
 			]); 
-			type.width = 80;
+			type.width = 90;
 			type.selectedIndex = condition.type;
 			type.addEventListener(IndexChangeEvent.CHANGING,function(e:IndexChangeEvent):void{
 				typeChange(condition,transition,hGroup,e.newIndex);
 			});
-			hGroup.addElement(input);
 			hGroup.addElement(type);
 			typeChange(condition,transition,hGroup,condition.type);
 			return hGroup;
@@ -119,25 +126,34 @@ package com.wonder
 			for (var i:int = 0; i < hGroup.numElements; i++) 
 			{
 				var element:SkinnableComponent = hGroup.getElementAt(i) as SkinnableComponent;
-				if (element.id == LOGIC_ID || element.id == VALUE_ID || element.id == REMOVE_ID) 
+				if (element.id == LOGIC_ID || element.id == VALUE_ID || element.id == REMOVE_ID || element.id == INPUT_ID) 
 				{
 					hGroup.removeElementAt(i);
+					i--;
 				}
 			}
 			switch(index)
 			{
 				case Condition.TYPE_BOOL:
 				{
+					var boolId:TextInput = new TextInput();
+					boolId.width = 50;
+					boolId.text = condition.id;
+					boolId.addEventListener(TextEvent.TEXT_INPUT,function(e:TextEvent):void{
+						condition.id = e.target.text + e.text;
+					})
+					boolId.id = INPUT_ID;
+					hGroup.addElement(boolId);	
 					var boolValue:DropDownList = new DropDownList();
 					boolValue.dataProvider = new ArrayCollection([  
-						{id:1,label:'true'},  
-						{id:0,label:'false'}
+						{id:0,label:'false'},
+						{id:1,label:'true'}
 					]); 
-					boolValue.width = 80;
+					boolValue.width = 65;
+					boolValue.id = VALUE_ID;
 					boolValue.addEventListener(IndexChangeEvent.CHANGING,function(e:IndexChangeEvent):void{
 						condition.value = e.newIndex;
 					})
-					boolValue.id = LOGIC_ID;
 					hGroup.addElement(boolValue);
 					condition.logic = Condition.LOGIC_EQUAL;
 					boolValue.selectedIndex = condition.value;
@@ -145,6 +161,14 @@ package com.wonder
 				}
 				case Condition.TYPE_NUMBER:
 				{
+					var numId:TextInput = new TextInput();
+					numId.width = 50;
+					numId.text = condition.id;
+					numId.addEventListener(TextEvent.TEXT_INPUT,function(e:TextEvent):void{
+						condition.id = e.target.text + e.text;
+					})
+					numId.id = INPUT_ID;
+					hGroup.addElement(numId);
 					var numLogic:DropDownList = new DropDownList();
 					numLogic.dataProvider = new ArrayCollection([  
 						{id:Condition.LOGIC_EQUAL,label:'='},  
@@ -152,18 +176,18 @@ package com.wonder
 						{id:Condition.LOGIC_LESS,label:'<'},  
 						{id:Condition.LOGIC_NOTEQUAL,label:'≠'}
 					]); 
-					numLogic.width = 80;
+					numLogic.width = 65;
 					numLogic.addEventListener(IndexChangeEvent.CHANGING,function(e:IndexChangeEvent):void{
 						condition.logic = e.newIndex;
 					});
 					var numValue:TextInput = new TextInput();
 					numValue.width = 50;
+					numValue.id = VALUE_ID;
 					numValue.text = condition.value.toString();
 					numValue.addEventListener(TextEvent.TEXT_INPUT,function(e:TextEvent):void{
 						condition.value = parseInt(e.target.text + e.text);
 					})
 					numLogic.id = LOGIC_ID;
-					numValue.id = VALUE_ID;
 					hGroup.addElement(numLogic);
 					hGroup.addElement(numValue);
 					numLogic.selectedIndex = condition.logic;
@@ -171,7 +195,18 @@ package com.wonder
 				}
 				case Condition.TYPE_TRIGGER:
 				{
-					
+					var triggerId:TextInput = new TextInput();
+					triggerId.width = 50;
+					triggerId.text = condition.id;
+					triggerId.addEventListener(TextEvent.TEXT_INPUT,function(e:TextEvent):void{
+						condition.id = e.target.text + e.text;
+					})
+					triggerId.id = INPUT_ID;
+					hGroup.addElement(triggerId);
+					break;
+				}
+				case Condition.TYPE_COMPLETE:
+				{
 					break;
 				}
 				default:
@@ -225,7 +260,7 @@ package com.wonder
 					m_editLayer.addChild(state);
 					m_stateArray.push(state);
 				}
-				var anyState:AnimState = new AnimState("AnyState");
+				var anyState:AnimState = new AnimState(AnimState.ANYSTATE_ID);
 				anyState.x = m_editLayer.width / 5;
 				anyState.y = m_editLayer.height / 2;
 				m_editLayer.addChild(anyState);
@@ -243,6 +278,18 @@ package com.wonder
 			m_defaultState = state;
 		}
 		
+		public function getStateById(id:String):AnimState
+		{
+			for each (var state:AnimState in m_stateArray)
+			{
+				if (state.id == id) 
+				{
+					return state;
+				}
+			}
+			return null;
+		}
+		
 		public function getStateByMouse(pt:Point):AnimState
 		{
 			for each (var state:AnimState in m_stateArray)
@@ -257,10 +304,15 @@ package com.wonder
 			return null;
 		}
 		
-		public function makeTransition(state:AnimState):void
+		public function makeTransition(state:AnimState,addDefaultCondition:Boolean = true):AnimTransition
 		{
 			var transition:AnimTransition = new AnimTransition(state);
 			m_transitionArray.push(transition);
+			if (addDefaultCondition) 
+			{
+				transition.addCondition();
+			}
+			return transition;
 		}
 		
 		public function updateArrow(state:AnimState):void
@@ -279,6 +331,7 @@ package com.wonder
 			{
 				if(oneTransition != transition && oneTransition.from == transition.from && oneTransition.to == transition.to){
 					removeTransition(transition);
+					Alert.show("Transition Already Exists!")
 					return;
 				}
 			}
@@ -292,7 +345,6 @@ package com.wonder
 				if(oneTransition == transition){
 					m_transitionArray.splice(i,1);
 					oneTransition.destroy();
-					Alert.show("Transition Already Exists!")
 					return;
 				}
 			}
@@ -312,7 +364,7 @@ package com.wonder
 		
 		public function save():void
 		{
-			DataParser.saveFsmJson("test",m_stateArray, m_transitionArray);
+			DataParser.saveFsmJson(m_skeletonName, m_stateArray, m_transitionArray);
 		}
 	}
 }

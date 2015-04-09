@@ -1,10 +1,13 @@
 package com.wonder
 {
 	import flash.display.Sprite;
+	import flash.events.ContextMenuEvent;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
+	import flash.ui.ContextMenu;
+	import flash.ui.ContextMenuItem;
 	
 	public class AnimTransition
 	{
@@ -25,9 +28,23 @@ package com.wonder
 			m_arrow.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			m_arrow.addEventListener(Event.REMOVED_FROM_STAGE,onDestroy);
 			m_conditionArray = new Array();
+			initMenu();
 		}
 		
-
+		private function initMenu():void
+		{
+			var contextMenu:ContextMenu = new ContextMenu();
+			var contextItem1:ContextMenuItem = new ContextMenuItem("Delete");
+			var self:AnimTransition = this;
+			contextItem1.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(e:ContextMenuEvent):void{
+				EditController.getInstance().removeTransition(self);
+				EditController.getInstance().curArrow = null;
+			});
+			contextMenu.customItems.push(contextItem1);
+			contextMenu.hideBuiltInItems();
+			m_arrow.contextMenu = contextMenu;
+		}
+		
 		public function get conditionArray():Array
 		{
 			return m_conditionArray;

@@ -3,12 +3,16 @@ package com.wonder
 	public class Condition
 	{
 		private var m_id:String = null;
-		private var m_type:int = -1;
+		private var m_type:int = 0;
 		private var m_value:int = 0;
-		private var m_logic:int = -1;
-		public static var TYPE_BOOL:int = 0;
-		public static var TYPE_NUMBER:int = 1;
-		public static var TYPE_TRIGGER:int = 2;
+		private var m_logic:int = 0;
+		
+		public static var COMPLETE_ID:String = "complete";
+		
+		public static var TYPE_COMPLETE:int = 0;
+		public static var TYPE_BOOL:int = 1;
+		public static var TYPE_NUMBER:int = 2;
+		public static var TYPE_TRIGGER:int = 3;
 		
 		public static var LOGIC_EQUAL:int = 0;
 		public static var LOGIC_GREATER:int = 1;
