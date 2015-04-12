@@ -1,9 +1,11 @@
 package com.wonder
 {
 	import flash.events.Event;
+	import flash.events.FileListEvent;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
+	import flash.net.FileFilter;
 
 	public class DataParser
 	{
@@ -19,8 +21,8 @@ package com.wonder
 				var stateObj:Object = new Object();
 				stateObj.state = state.id;
 				stateObj.transition = new Array();
-				stateObj.x = state.x;
-				stateObj.y = state.y;
+				stateObj["x"] = state.x;
+				stateObj["y"] = state.y;
 				if (state.isDefaultState) 
 				{
 					stateObj.default = true;
@@ -30,21 +32,21 @@ package com.wonder
 					if (transition.from == state) 
 					{
 						var transitionObj:Object = new Object();
-						transitionObj.nextState = transition.to.id;
+						transitionObj["nextState"] = transition.to.id;
 						transitionObj.condition = new Array();
 						for each (var condition:Condition in transition.conditionArray) 
 						{
-							if (condition.type == Condition.TYPE_COMPLETE) 
+							if (condition.type == Parameter.TYPE_COMPLETE) 
 							{
-								condition.id = Condition.COMPLETE_ID;
+								condition.id = Parameter.COMPLETE_ID;
 							}
 							if (condition.id) 
 							{
 								var conditionObj:Object = new Object();
-								conditionObj.id = condition.id;
-								conditionObj.type = condition.type;
-								conditionObj.logic = condition.logic;
-								conditionObj.value = condition.value;
+								conditionObj["id"] = condition.id;
+								conditionObj["type"] = condition.type;
+								conditionObj["logic"] = condition.logic;
+								conditionObj["value"] = condition.value;
 								transitionObj.condition.push(conditionObj);
 							}
 						}
@@ -72,91 +74,114 @@ package com.wonder
 			}
 		}
 		
-		private static function readFile(type:int):void
+		public static function browseForOpenFile():void
 		{
 			var fileToSave:File = File.documentsDirectory;
-			fileToSave.browseForOpen("Select Directory");
-			fileToSave.addEventListener(Event.SELECT, onFileSelect);
-			
-			function onFileSelect(event:Event):void 
+			fileToSave.browseForOpenMultiple("Select Directory",[new FileFilter("Text", "*.json")]);
+			fileToSave.addEventListener(FileListEvent.SELECT_MULTIPLE, onFileSelect);
+			function onFileSelect(event:FileListEvent):void 
 			{
-				var fs:FileStream = new FileStream(); 
-				fs.open(File(event.target),FileMode.READ); 
-				var content:String = fs.readUTFBytes(fs.bytesAvailable); 
-				fs.close();
-				switch(type)
+				parseFiles(event.files);
+			}
+		}
+		
+		public static function parseFiles(files:Array):void
+		{
+			if(files.length == 1){
+				parseSingleFile(files[0]);
+			}else{
+				for (var i:int = 0; i < files.length; i++)
 				{
-					case FILETYPE_SKELETON:
+					var file:File = files[i];
+					parseSingleFile(file, i>0);
+				}
+			}
+		}
+		
+		private static function parseSingleFile(file:File, isAppend:Boolean=false):void
+		{
+			var fs:FileStream = new FileStream(); 
+			fs.open(File(file),FileMode.READ); 
+			var content:String = fs.readUTFBytes(fs.bytesAvailable); 
+			fs.close();
+			
+			var type:int;
+			if (file.name.indexOf("_fsm.json") != -1) 
+			{
+				type = FILETYPE_FSM;
+			}
+			else if (file.name.indexOf("_skeleton.json") != -1) 
+			{
+				type = FILETYPE_SKELETON;
+			}
+			
+			switch(type)
+			{
+				case FILETYPE_SKELETON:
+				{
+					var obj:Object = JSON.parse(content);
+					var stateStrArr:Array = new Array();
+					for each (var ani:Object in obj["armature"][0]["animation"]) 
 					{
-						var obj:Object = JSON.parse(content);
-						var stateStrArr:Array = new Array();
-						for each (var ani:Object in obj.armature[0].animation) 
-						{
-							stateStrArr.push(ani.name);
-						}
-						EditController.getInstance().initStates(stateStrArr,obj.armature[0].animation.name);
-						break;
+						stateStrArr.push(ani["name"]);
 					}
-					case FILETYPE_FSM:
+					if (isAppend) 
 					{
-						var stateArr:Object = JSON.parse(content);
-						var stateStrArray:Array = new Array();
+						EditController.getInstance().addStates(stateStrArr);
+					}else{
+						EditController.getInstance().initStates(stateStrArr,obj["armature"][0]["animation"]["name"]);
+					}
+					break;
+				}
+				case FILETYPE_FSM:
+				{
+					var stateArr:Object = JSON.parse(content);
+					var stateStrArray:Array = new Array();
+					for each (var oneStateObj:Object in stateArr) 
+					{
+						if (oneStateObj.state != AnimState.ANYSTATE_ID) 
+						{
+							stateStrArray.push(oneStateObj.state);
+						}
+					}
+					EditController.getInstance().initStates(stateStrArray,file.name.split(".")[0]);
+					for each (var state:AnimState in EditController.getInstance().stateArray) 
+					{
 						for each (var stateObj:Object in stateArr) 
 						{
-							if (stateObj.state != AnimState.ANYSTATE_ID) 
+							if (stateObj.state == state.id) 
 							{
-								stateStrArray.push(stateObj.state);
-							}
-						}
-						EditController.getInstance().initStates(stateStrArray,fileToSave.name.split(".")[0]);
-						for each (var state:AnimState in EditController.getInstance().stateArray) 
-						{
-							for each (var stateObj:Object in stateArr) 
-							{
-								if (stateObj.state == state.id) 
+								state.x = stateObj["x"];
+								state.y = stateObj["y"];
+								for each (var transitionObj:Object in stateObj.transition) 
 								{
-									state.x = stateObj.x;
-									state.y = stateObj.y;
-									for each (var transitionObj:Object in stateObj.transition) 
+									var transition:AnimTransition = EditController.getInstance().makeTransition(state,false);
+									transition.to = EditController.getInstance().getStateById(transitionObj["nextState"]);
+									for each (var conditionObj:Object in transitionObj.condition) 
 									{
-										var transition:AnimTransition = EditController.getInstance().makeTransition(state,false);
-										transition.to = EditController.getInstance().getStateById(transitionObj.nextState);
-										for each (var conditionObj:Object in transitionObj.condition) 
-										{
-											var condition:Condition = transition.addCondition();
-											condition.id = conditionObj.id;
-											condition.type = conditionObj.type;
-											condition.logic = conditionObj.logic;
-											condition.value = conditionObj.value;
-										}
+										var condition:Condition = transition.addCondition();
+										condition.id = conditionObj["id"];
+										condition.type = conditionObj["type"];
+										condition.logic = conditionObj["logic"];
+										condition.value = conditionObj["value"];
 									}
 								}
-								EditController.getInstance().updateArrow(state);
 							}
+							EditController.getInstance().updateArrow(state);
 						}
-						break;
 					}
-					default:
-					{
-						break;
-					}
+					break;
+				}
+				default:
+				{
+					break;
 				}
 			}
 		}
 		
 		public static function saveFsmJson(fileName:String,stateArr:Array,transitionArr:Array):void
 		{
-			saveFile(fileName+".json",generateJson(stateArr,transitionArr));
-		}
-		
-		public static function parseSkeletonJson():void
-		{
-			readFile(FILETYPE_SKELETON);
-		}
-		
-		public static function parseFSMJson():void
-		{
-			readFile(FILETYPE_FSM);
+			saveFile(fileName+(fileName.indexOf("fsm") == -1?"_fsm.json":".json"),generateJson(stateArr,transitionArr));
 		}
 	}
 }

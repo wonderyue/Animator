@@ -7,13 +7,6 @@ package com.wonder
 		private var m_value:int = 0;
 		private var m_logic:int = 0;
 		
-		public static var COMPLETE_ID:String = "complete";
-		
-		public static var TYPE_COMPLETE:int = 0;
-		public static var TYPE_BOOL:int = 1;
-		public static var TYPE_NUMBER:int = 2;
-		public static var TYPE_TRIGGER:int = 3;
-		
 		public static var LOGIC_EQUAL:int = 0;
 		public static var LOGIC_GREATER:int = 1;
 		public static var LOGIC_LESS:int = 2;

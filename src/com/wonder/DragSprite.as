@@ -61,10 +61,10 @@ package com.wonder
 		protected function onMove(e:MouseEvent):void
 		{
 			if(m_isDrag){
-				var rect:Rectangle = new Rectangle(m_border,m_border,parent.width - width - m_border,parent.height - height - m_border);
-				this.startDrag(false,rect);
+				this.startDrag(false);
 				if(stage)stage.quality = StageQuality.LOW;
 			}
+			e.stopImmediatePropagation();
 		}
 		
 		protected function onMouseUp(e:MouseEvent):void
@@ -79,6 +79,7 @@ package com.wonder
 		protected function onMouseDown(e:MouseEvent):void
 		{
 			m_isDrag = true;
+			e.stopImmediatePropagation();
 		}
 	}
 }

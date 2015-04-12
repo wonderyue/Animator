@@ -157,7 +157,7 @@ package com.wonder
 		private function onMouseUp(e:MouseEvent):void
 		{
 			var state:AnimState = EditController.getInstance().getStateByMouse(new Point(m_arrow.stage.mouseX, m_arrow.stage.mouseY));
-			if(state && !to){
+			if(state && !to && !state.isAnyState){
 				to = state;
 				draw();
 				EditController.getInstance().checkTransitionExist(this);

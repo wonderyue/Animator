@@ -3,30 +3,70 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
 					   xmlns:ns1="*"
-					   width="960" height="480" alpha="1.0" backgroundAlpha="1.0"
+					   width="960" height="480" alpha="1.0" backgroundAlpha="1.0" showStatusBar="false"
 					   creationComplete="init()">
 	<fx:Declarations>
-		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
-	<s:HGroup left="10" right="10" top="10" bottom="10" requestedColumnCount="2">
-		<s:BorderContainer id="borderLayer" width="65%" height="100%" alpha="1.0" borderStyle="solid"
+	<s:HGroup id="mainContainer" left="10" right="10" top="10" bottom="10" requestedColumnCount="2" horizontalAlign="right">
+		<s:BorderContainer id="borderContainer" width="65%" height="100%" alpha="1.0" borderStyle="solid"
 						   cornerRadius="10">
+			<s:Button id="addBtn" x="10" y="10" width="100" height="30" label="+ Add State"
+					  click="onAdd()" fontFamily="Courier New" fontSize="12">
+			</s:Button>
+			<s:VSlider id="zoomSlider" x="28" y="48" change="onZoom()" liveDragging="true"
+					   maximum="1.5" minimum="0.5" stepSize="0.1" value="1"/>
+			<s:Label x="10" y="48" fontFamily="Courier New" fontSize="18" text="+"/>
+			<s:Label x="10" y="138" fontFamily="Courier New" fontSize="18" text="-"/>
+			<s:Label x="7" y="95" fontFamily="Courier New" fontSize="10" text="1.0"/>
+			<s:Panel id="paramPanel" left="1" bottom="15" width="200" height="35" minHeight="35"
+					 maxHeight="150" enabled="true"
+					 fontFamily="Courier New" fontSize="12" fontWeight="bold" title="Parameters">
+				<s:Image id="addParam" right="2" top="-28" scaleMode="letterbox" smooth="false" click="onAddParam(event)"
+						 source="assets/+.png"/>
+				<s:Scroller id="paramScroller" x="0" y="0" width="100%" height="100%">
+					<s:VGroup id="paramList" width="100%" height="100%" fontWeight="normal" fontSize="10"
+							  paddingBottom="6" paddingLeft="3" paddingRight="3" paddingTop="6">
+					</s:VGroup>
+				</s:Scroller>
+				<s:Image id="showBtn" top="-32" width="100%" height="35" alpha="0"
+						 click="onParamPanelClick()" horizontalCenter="0" source="assets/up.png"/>
+			</s:Panel>
 		</s:BorderContainer>
 		
-		<s:VGroup id="rightColumn"  width="35%" height="100%">
-			<s:BorderContainer width="100%" height="80%" cornerRadius="10">
-				<s:VGroup id="inspector" x="0" y="0" width="100%" height="100%" paddingBottom="10"
-						  paddingLeft="10" paddingRight="10" paddingTop="10">
+		<s:VGroup id="rightColumn" width="325" height="100%" verticalAlign="bottom">
+			<s:Panel id="transitionPanel" width="100%" height="270" fontFamily="Courier New" fontSize="12"
+					 fontWeight="bold" title="Transition Inspector">
+				<s:VGroup id="inspector" x="0" y="0" width="100%" height="100%" fontSize="10" fontFamily="Arial"
+						  fontWeight="normal" paddingBottom="10" paddingLeft="10" paddingRight="10"
+						  paddingTop="10">
 				</s:VGroup>
-			</s:BorderContainer>
-			<s:BorderContainer width="100%" height="20%" cornerRadius="10">
+			</s:Panel>
+			<s:Panel id="statePanel" width="100%" height="120" enabled="true" fontFamily="Courier New" fontSize="12"
+					 fontWeight="normal" title="State Information">
+				<s:VGroup id="stateInfo" x="0" y="0" width="100%" height="100%" paddingBottom="10"
+						  paddingLeft="10" paddingRight="10" paddingTop="10">
+					<s:HGroup width="100%" height="30">
+						<s:Label width="80" height="30" fontFamily="Courier New" fontSize="13"
+								 fontStyle="normal" text="stateID:" textAlign="center"
+								 verticalAlign="middle"/>
+						<s:TextInput id="inputState" width="100" height="30"/>
+					</s:HGroup>
+					<s:HGroup width="100%" height="30">
+						<s:Label width="80" height="30" fontFamily="Courier New" fontSize="13"
+								 text="animation:" textAlign="center" verticalAlign="middle"/>
+						<s:TextInput id="inputAnimation" width="100" height="30"/>
+					</s:HGroup>
+				</s:VGroup>
+			</s:Panel>
+			<s:BorderContainer id="btnPanel" width="100%" height="60" cornerRadius="10">
 				<s:HGroup x="0" y="0" width="100%" height="100%" paddingBottom="10"
 						  paddingLeft="10" paddingRight="10" paddingTop="10">
-					<s:Button id="importBtn" label="import" width = "80" height = "40" click="onImport()">
+					<s:Button id="openBtn" width="98" height="40" label="open" click="onOpen()"
+							  fontFamily="Courier New" fontSize="12" fontWeight="normal" 
+							  toolTip="Files support: &#13; 1.*_fsm.json exported by this editor &#13; 2.*_skeleton.json for Egret Engine(support multiple files)">
 					</s:Button>
-					<s:Button id="saveBtn" label="save" width = "80" height = "40" click="onSave()">
-					</s:Button>
-					<s:Button id="openBtn" label="open" width = "80" height = "40" click="onOpen()">
+					<s:Button id="saveBtn" width="98" height="40" label="save" click="onSave()"
+							  fontFamily="Courier New" fontSize="12" fontWeight="normal">
 					</s:Button>
 				</s:HGroup>
 			</s:BorderContainer>
@@ -35,31 +75,102 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import com.wonder.AnimState;
 			import com.wonder.DataParser;
 			import com.wonder.EditController;
+			import com.wonder.Parameter;
 			
+			import fl.containers.ScrollPane;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Menu;
 			import mx.core.UIComponent;
+			import mx.managers.DragManager;
 			
-			private var m_editLayer:UIComponent;
-			private var m_inspector:VGroup;
-			private var m_borderContainer:BorderContainer;
+			import spark.components.DropDownList;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			import spark.layouts.VerticalAlign;
 			
+			private var m_scrollLayer:ScrollPane;
+			private var m_scrollContent:Sprite;
+			private static var MAX_WIDTH:int = 2000;
+			private static var MAX_HEIGHT:int = 2000;
+
+			public function get editLayer():Sprite
+			{
+				return m_scrollContent;
+			}
+
+			public function get transitionInspector():VGroup
+			{
+				return inspector;
+			}
+
+			public function get stateIdInputer():TextInput
+			{
+				return inputState;
+			}
+
+			public function get animationInputer():TextInput
+			{
+				return inputAnimation;
+			}
+
 			public function init():void
 			{
-				m_inspector = this["inspector"]; 
-				m_editLayer = new UIComponent();
-				m_borderContainer = this["borderLayer"];
-				m_borderContainer.addElement(m_editLayer);
-				m_borderContainer.addEventListener(Event.RESIZE, onResize);
+				var container:UIComponent = new UIComponent();
+				container.percentHeight = container.percentWidth = 100;
+				borderContainer.addElementAt(container,0);
+				m_scrollLayer = new ScrollPane();
+				m_scrollLayer.width = borderContainer.width;
+				m_scrollLayer.height = borderContainer.height;
+				m_scrollLayer.scrollDrag = true;
+				container.addChild(m_scrollLayer);
+				
+				
+				m_scrollContent = new MovieClip();
+				m_scrollContent.graphics.clear();
+				m_scrollContent.graphics.beginFill(0xeeffff);
+				m_scrollContent.graphics.drawRoundRect(0,0,MAX_WIDTH,MAX_HEIGHT,18,18);
+				m_scrollContent.graphics.endFill();
+				m_scrollContent.width = MAX_WIDTH;
+				m_scrollContent.height = MAX_HEIGHT;
+				m_scrollLayer.source = m_scrollContent;
+				
+				m_scrollLayer.addEventListener(Event.ADDED_TO_STAGE, onScrollAdded);
+				mainContainer.addEventListener(Event.RESIZE, onResize);
+				borderContainer.addEventListener(Event.RESIZE, onBorderContainerResize);
+				rightColumn.addEventListener(Event.RESIZE, onRightColumnResize);
 				onResize(null);
 				
-				new EditController(m_editLayer,m_inspector);
+				addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER,onDragIn);
+				addEventListener(NativeDragEvent.NATIVE_DRAG_DROP,onDragDrop);
+				
+				new EditController(this);
+			}
+
+			private function onScrollAdded(event:Event):void
+			{
+				m_scrollLayer.verticalScrollPosition = m_scrollLayer.maxVerticalScrollPosition / 2;
+				m_scrollLayer.horizontalScrollPosition = m_scrollLayer.maxHorizontalScrollPosition / 2;
 			}
 			
 			private function onResize(e:Event):void
 			{
-				m_editLayer.width = m_borderContainer.width;
-				m_editLayer.height = m_borderContainer.height;
+				borderContainer.percentWidth = (mainContainer.width - rightColumn.width - mainContainer.gap) / mainContainer.width * 100;
+			}
+			
+			private function onRightColumnResize(e:Event):void
+			{
+				transitionPanel.percentHeight = (rightColumn.height - statePanel.height - btnPanel.height - rightColumn.gap * 2) / rightColumn.height * 100;
+			}
+			
+			private function onBorderContainerResize(e:Event):void
+			{
+				m_scrollLayer.width = borderContainer.width;
+				m_scrollLayer.height = borderContainer.height;
+				m_scrollLayer.update();
 			}
 			
 			private function onSave():void
@@ -67,14 +178,64 @@
 				EditController.getInstance().save();
 			}
 			
-			private function onImport():void
-			{
-				DataParser.parseSkeletonJson();
-			}
-			
 			private function onOpen():void
 			{
-				DataParser.parseFSMJson();
+				DataParser.browseForOpenFile();
+			}
+			
+			private function onZoom():void
+			{
+				var perX:Number = m_scrollLayer.verticalScrollPosition / m_scrollLayer.maxVerticalScrollPosition;
+				var perY:Number = m_scrollLayer.horizontalScrollPosition / m_scrollLayer.maxHorizontalScrollPosition;
+				m_scrollContent.scaleX = m_scrollContent.scaleY = zoomSlider.value;
+				m_scrollLayer.refreshPane();
+				m_scrollLayer.verticalScrollPosition = m_scrollLayer.maxVerticalScrollPosition*perX;
+				m_scrollLayer.horizontalScrollPosition = m_scrollLayer.maxHorizontalScrollPosition*perY;
+				m_scrollLayer.update();
+			}
+			
+			private function onAdd():void
+			{
+				var state:AnimState = EditController.getInstance().addState();
+				state.x = m_scrollContent.mouseX + 100;
+				state.y = m_scrollContent.mouseY + 100;
+			}
+			
+			private function onAddParam(e:Event):void
+			{
+				var param:Parameter = new Parameter();
+				EditController.getInstance().addParam(param);
+				e.stopImmediatePropagation();
+			}
+			
+			private function onParamPanelClick():void
+			{
+				if (paramPanel.height <= paramPanel.minHeight) 
+				{
+					openParamPanel();
+				}else{
+					shutParamPanel();
+				}
+			}
+			
+			private function shutParamPanel():void
+			{
+				paramPanel.height = paramPanel.minHeight;
+			}
+			
+			private function openParamPanel():void
+			{
+				paramPanel.height = Math.max(paramPanel.minHeight, Math.min(paramScroller.viewport.contentHeight, paramPanel.maxHeight));
+			}
+
+			private function onDragIn(event:NativeDragEvent):void{
+				DragManager.acceptDragDrop(this);
+			}
+			
+			private function onDragDrop(e:NativeDragEvent):void
+			{
+				var filesArray:Array = e.clipboard.getData(ClipboardFormats.FILE_LIST_FORMAT) as Array;
+				DataParser.parseFiles(filesArray);
 			}
 		]]>
 	</fx:Script>
