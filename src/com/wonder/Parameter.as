@@ -3,6 +3,7 @@ package com.wonder
 	public class Parameter
 	{
 		public static var COMPLETE_ID:String = "complete";
+		public static var DEFAULT_ID:String = "unused";
 		
 		public static var TYPE_COMPLETE:int = 0;
 		public static var TYPE_BOOL:int = 1;

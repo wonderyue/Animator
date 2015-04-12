@@ -45,7 +45,8 @@ package com.wonder
 		private var m_paramList:VGroup;
 		private var m_paramScroller:Scroller;
 		private var m_paramPanel:Panel;
-		
+		private var m_completeParam:Parameter;
+
 		public static function getInstance():EditController
 		{
 			return _instance;
@@ -70,9 +71,44 @@ package com.wonder
 			})
 		}
 		
+		private function checkStateIdExist(id:String):Boolean
+		{
+			for (var i:int = 0; i < m_stateArray.length; i++)
+			{
+				var element:AnimState = m_stateArray[i] as AnimState;
+				if (id == element.id) 
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		private function generateNewStateId(id:String):String
+		{
+			if (id.indexOf("Untitled") == -1) 
+			{
+				return id;
+			}
+			var max:int = -1;
+			for (var i:int = 0; i < m_stateArray.length; i++)
+			{
+				var element:AnimState = m_stateArray[i] as AnimState;
+				if (element.id.indexOf("Untitled") != -1) 
+				{
+					var arr:Array = element.id.split("Untitled");
+					if (arr.length > 1) 
+					{
+						max = Math.max(max, parseInt(arr[1]));
+					}
+				}
+			}
+			return "Untitled"+(max+1);
+		}
+		
 		public function addState(id:String = "Untitled", x:Number = 0, y:Number = 0):AnimState
 		{
-			var state:AnimState = new AnimState(id);
+			var state:AnimState = new AnimState(generateNewStateId(id));
 			state.x = x;
 			state.y = y;
 			m_editLayer.addChild(state);
@@ -103,7 +139,8 @@ package com.wonder
 				setDefaultState(AnimState(m_stateArray[0]));
 			}
 			m_paramArray = new Array();
-			m_paramArray.push(new Parameter(Parameter.COMPLETE_ID, Parameter.TYPE_COMPLETE));
+			m_completeParam = new Parameter(Parameter.COMPLETE_ID, Parameter.TYPE_COMPLETE)
+			m_paramArray.push(m_completeParam);
 		}
 		
 		public function addStates(input:Array):void
@@ -126,6 +163,11 @@ package com.wonder
 		public function get paramArray():Array
 		{
 			return m_paramArray;
+		}
+		
+		public function get completeParam():Parameter
+		{
+			return m_completeParam;
 		}
 
 		public function get stateArray():Array
@@ -181,8 +223,26 @@ package com.wonder
 			updateStateInfo(m_curState);
 		}
 		
+		private function checkParamExist(param:Parameter):Boolean
+		{
+			for (var i:int = 0; i < m_paramArray.length; i++)
+			{
+				var element:Parameter = m_paramArray[i] as Parameter;
+				if (param.id == element.id) 
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
 		public function addParam(param:Parameter):void
 		{
+			if (checkParamExist(param)) 
+			{
+				Alert.show("Parameter Already Exists!");
+				return;
+			}
 			m_paramArray.push(param);
 			var hGroup:HGroup = new HGroup();
 			hGroup.verticalAlign = VerticalAlign.MIDDLE;
@@ -261,25 +321,26 @@ package com.wonder
 			var hGroup:HGroup = new HGroup();
 			hGroup.verticalAlign = VerticalAlign.MIDDLE;
 			var type:DropDownList = new DropDownList();
-			type.dataProvider = new ArrayCollection([
-				{id:Parameter.TYPE_COMPLETE,label:'complete'},
-				{id:Parameter.TYPE_BOOL,label:'bool'},  
-				{id:Parameter.TYPE_NUMBER,label:'number'},  
-				{id:Parameter.TYPE_TRIGGER,label:'trigger'}
-			]); 
+			var array:Array = new Array();
+			for (var i:int = 0; i < m_paramArray.length; i++)
+			{
+				var param:Parameter = m_paramArray[i] as Parameter;
+				array.push({label:param.id, parameter:param});
+			}
+			type.dataProvider = new ArrayCollection(array); 
 			type.width = 90;
 			type.selectedIndex = condition.type;
 			type.addEventListener(IndexChangeEvent.CHANGING,function(e:IndexChangeEvent):void{
-				typeChange(condition,transition,hGroup,type.selectedItem.id);
+				changeParameter(condition,transition,hGroup,type.selectedItem.parameter);
 			});
 			hGroup.addElement(type);
-			typeChange(condition,transition,hGroup,condition.type);
+			changeParameter(condition,transition,hGroup,condition.parameter);
 			return hGroup;
 		}
 		
-		private function typeChange(condition:Condition,transition:AnimTransition,hGroup:HGroup,index:int):void
+		private function changeParameter(condition:Condition,transition:AnimTransition,hGroup:HGroup,param:Parameter):void
 		{
-			condition.type = index;
+			condition.type = param.type;
 			for (var i:int = 0; i < hGroup.numElements; i++) 
 			{
 				var element:SkinnableComponent = hGroup.getElementAt(i) as SkinnableComponent;
@@ -289,18 +350,10 @@ package com.wonder
 					i--;
 				}
 			}
-			switch(index)
+			switch(param.type)
 			{
 				case Parameter.TYPE_BOOL:
 				{
-					var boolId:TextInput = new TextInput();
-					boolId.width = 50;
-					boolId.text = condition.id;
-					boolId.addEventListener(TextOperationEvent.CHANGE,function(e:TextOperationEvent):void{
-						condition.id = e.target.text;
-					})
-					boolId.id = INPUT_ID;
-					hGroup.addElement(boolId);	
 					var boolValue:DropDownList = new DropDownList();
 					boolValue.dataProvider = new ArrayCollection([  
 						{id:0,label:'false'},
@@ -318,14 +371,6 @@ package com.wonder
 				}
 				case Parameter.TYPE_NUMBER:
 				{
-					var numId:TextInput = new TextInput();
-					numId.width = 50;
-					numId.text = condition.id;
-					numId.addEventListener(TextOperationEvent.CHANGE,function(e:TextOperationEvent):void{
-						condition.id = e.target.text;
-					})
-					numId.id = INPUT_ID;
-					hGroup.addElement(numId);
 					var numLogic:DropDownList = new DropDownList();
 					numLogic.dataProvider = new ArrayCollection([  
 						{id:Condition.LOGIC_EQUAL,label:'='},  
@@ -352,14 +397,6 @@ package com.wonder
 				}
 				case Parameter.TYPE_TRIGGER:
 				{
-					var triggerId:TextInput = new TextInput();
-					triggerId.width = 50;
-					triggerId.text = condition.id;
-					triggerId.addEventListener(TextOperationEvent.CHANGE,function(e:TextOperationEvent):void{
-						condition.id = e.target.text;
-					})
-					triggerId.id = INPUT_ID;
-					hGroup.addElement(triggerId);
 					break;
 				}
 				case Parameter.TYPE_COMPLETE:
