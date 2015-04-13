@@ -94,7 +94,7 @@ package com.wonder
 						{
 							stateStrArr.push(ani.name);
 						}
-						EditController.getInstance().initStates(stateStrArr,obj.armature[0].animation.name);
+						EditController.getInstance().initStates(stateStrArr,obj.armature[0].name);
 						break;
 					}
 					case FILETYPE_FSM:
