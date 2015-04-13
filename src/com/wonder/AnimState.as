@@ -114,6 +114,7 @@ package com.wonder
 			var contextItem1:ContextMenuItem = new ContextMenuItem("Make Transition");
 			var contextItem2:ContextMenuItem = new ContextMenuItem("Set As Default");
 			var contextItem3:ContextMenuItem = new ContextMenuItem("Copy");
+			var contextItem4:ContextMenuItem = new ContextMenuItem("Delete");
 			var self:AnimState = this;
 			contextItem1.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(e:ContextMenuEvent):void{
 				EditController.getInstance().makeTransition(self);
@@ -125,11 +126,15 @@ package com.wonder
 				var state:AnimState = EditController.getInstance().addState(self.id + "(copy)", x + 30, y + 30);
 				state.animation = self.animation;
 			});
+			contextItem4.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, function(e:ContextMenuEvent):void{
+				EditController.getInstance().removeState(self);
+			});
 			contextMenu.customItems.push(contextItem1);
 			if (!isAnyState) 
 			{
 				contextMenu.customItems.push(contextItem2);
 				contextMenu.customItems.push(contextItem3);
+				contextMenu.customItems.push(contextItem4);
 			}
 			contextMenu.hideBuiltInItems();
 			this.contextMenu = contextMenu;
@@ -171,6 +176,14 @@ package com.wonder
 			super.onMouseUp(e);
 			EditController.getInstance().updateArrow(this);
 			EditController.getInstance().curState = this;
+		}
+		
+		public function destroy():void
+		{
+			if (parent) 
+			{
+				parent.removeChild(this);
+			}
 		}
 	}
 }

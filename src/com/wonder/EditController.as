@@ -117,6 +117,28 @@ package com.wonder
 			return state;
 		}
 		
+		public function removeState(state:AnimState):void
+		{
+			for (var i:int = 0; i < m_stateArray.length; i++)
+			{
+				var oneState:AnimState = m_stateArray[i];
+				if(oneState == state){
+					for (var j:int = 0; j < m_transitionArray.length; j++)
+					{
+						var oneTransition:AnimTransition = m_transitionArray[j];
+						if(oneTransition.to == state || oneTransition.from == state){
+							m_transitionArray.splice(j,1);
+							oneTransition.destroy();
+							j--;
+						}
+					}
+					m_stateArray.splice(i,1);
+					state.destroy();
+					return;
+				}
+			}
+		}
+		
 		public function initStates(input:Array = null,skeletonName:String = "fsm"):void
 		{
 			m_skeletonName = skeletonName;
@@ -282,6 +304,7 @@ package com.wonder
 			}
 			m_paramScroller.validateNow();
 			m_paramScroller.viewport.verticalScrollPosition=m_paramScroller.viewport.contentHeight;
+			updateTransitionInspector(m_curArrow);
 		}
 		
 		public function removeParam(param:Parameter):void
