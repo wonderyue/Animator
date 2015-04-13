@@ -52,7 +52,7 @@ package com.wonder
 
 		public function addCondition():Condition
 		{
-			var condition:Condition = new Condition();
+			var condition:Condition = new Condition(EditController.getInstance().completeParam);
 			m_conditionArray.push(condition);
 			return condition;
 		}
@@ -157,7 +157,7 @@ package com.wonder
 		private function onMouseUp(e:MouseEvent):void
 		{
 			var state:AnimState = EditController.getInstance().getStateByMouse(new Point(m_arrow.stage.mouseX, m_arrow.stage.mouseY));
-			if(state && !to){
+			if(state && !to && !state.isAnyState){
 				to = state;
 				draw();
 				EditController.getInstance().checkTransitionExist(this);

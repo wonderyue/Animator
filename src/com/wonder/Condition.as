@@ -2,29 +2,32 @@ package com.wonder
 {
 	public class Condition
 	{
+		private var m_parameter:Parameter;
 		private var m_id:String = null;
 		private var m_type:int = 0;
 		private var m_value:int = 0;
 		private var m_logic:int = 0;
-		
-		public static var COMPLETE_ID:String = "complete";
-		
-		public static var TYPE_COMPLETE:int = 0;
-		public static var TYPE_BOOL:int = 1;
-		public static var TYPE_NUMBER:int = 2;
-		public static var TYPE_TRIGGER:int = 3;
 		
 		public static var LOGIC_EQUAL:int = 0;
 		public static var LOGIC_GREATER:int = 1;
 		public static var LOGIC_LESS:int = 2;
 		public static var LOGIC_NOTEQUAL:int = 3;
 		
-		public function Condition()
+		public function Condition(param:Parameter)
 		{
-			m_id = id;
-			m_type = type;
-			m_value = value;
-			m_logic = logic;
+			parameter = param;
+		}
+
+		public function get parameter():Parameter
+		{
+			return m_parameter;
+		}
+
+		public function set parameter(value:Parameter):void
+		{
+			m_parameter = value;
+			m_id = m_parameter.id;
+			m_type = m_parameter.type;
 		}
 
 		public function get id():String
