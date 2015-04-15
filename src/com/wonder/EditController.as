@@ -155,8 +155,10 @@ package com.wonder
 			{
 				for (var i:int = 0; i < input.length; i++) 
 				{
-					var stateName:String = input[i];
-					addState(stateName, m_editLayer.width / 2 - 200 + 250*Math.cos(i/input.length*Math.PI-Math.PI*0.75), m_editLayer.height / 2 + 250*Math.sin(i/input.length*Math.PI-Math.PI*0.75));
+					var stateName:String = input[i]["state"];
+					var animation:String = input[i]["animation"];
+					var state:AnimState = addState(stateName, m_editLayer.width / 2 - 200 + 250*Math.cos(i/input.length*Math.PI-Math.PI*0.75), m_editLayer.height / 2 + 250*Math.sin(i/input.length*Math.PI-Math.PI*0.75));
+					state.animation = animation;
 				}
 				var anyState:AnimState = addState(AnimState.ANYSTATE_ID, m_editLayer.width / 7 * 3, m_editLayer.height / 2);
 				setDefaultState(AnimState(m_stateArray[0]));
@@ -172,8 +174,10 @@ package com.wonder
 			{
 				for (var i:int = 0; i < input.length; i++) 
 				{
-					var stateName:String = input[i];
-					addState(stateName, m_editLayer.width / 2 - 200 + 250*Math.cos((i+m_stateArray.length)/input.length*Math.PI-Math.PI*0.75), m_editLayer.height / 2 + 250*Math.sin((i+m_stateArray.length)/input.length*Math.PI-Math.PI*0.75));
+					var stateName:String = input[i]["state"];
+					var animation:String = input[i]["animation"];
+					var state:AnimState = addState(stateName, m_editLayer.width / 2 - 200 + 250*Math.cos((i+m_stateArray.length)/input.length*Math.PI-Math.PI*0.75), m_editLayer.height / 2 + 250*Math.sin((i+m_stateArray.length)/input.length*Math.PI-Math.PI*0.75));
+					state.animation = animation;
 				}
 			}
 		}

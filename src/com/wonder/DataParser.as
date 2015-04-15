@@ -19,8 +19,9 @@ package com.wonder
 			for each (var state:AnimState in stateArr) 
 			{
 				var stateObj:Object = new Object();
-				stateObj.state = state.id;
-				stateObj.transition = new Array();
+				stateObj["state"] = state.id;
+				stateObj["animation"] = state.animation;
+				stateObj["transition"] = new Array();
 				stateObj["x"] = state.x;
 				stateObj["y"] = state.y;
 				if (state.isDefaultState) 
@@ -150,9 +151,9 @@ package com.wonder
 					var stateStrArray:Array = new Array();
 					for each (var oneStateObj:Object in stateArr) 
 					{
-						if (oneStateObj.state != AnimState.ANYSTATE_ID) 
+						if (oneStateObj["state"] != AnimState.ANYSTATE_ID) 
 						{
-							stateStrArray.push(oneStateObj.state);
+							stateStrArray.push({"state":oneStateObj["state"],"animation":oneStateObj["animation"]});
 						}
 					}
 					EditController.getInstance().initStates(stateStrArray,file.name.split(".")[0]);
@@ -160,11 +161,11 @@ package com.wonder
 					{
 						for each (var stateObj:Object in stateArr) 
 						{
-							if (stateObj.state == state.id) 
+							if (stateObj["state"] == state.id) 
 							{
 								state.x = stateObj["x"];
 								state.y = stateObj["y"];
-								for each (var transitionObj:Object in stateObj.transition) 
+								for each (var transitionObj:Object in stateObj["transition"]) 
 								{
 									var transition:AnimTransition = EditController.getInstance().makeTransition(state,false);
 									transition.to = EditController.getInstance().getStateById(transitionObj["nextState"]);
