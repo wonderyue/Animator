@@ -279,6 +279,7 @@ package com.wonder
 			input.text = param.id;
 			input.addEventListener(TextOperationEvent.CHANGE,function(e:TextOperationEvent):void{
 				param.id = e.target.text;
+				updateTransitionInspector(m_curArrow);
 			})
 			input.width = 60;
 			var type:DropDownList = new DropDownList();
@@ -291,12 +292,14 @@ package com.wonder
 			type.selectedIndex = param.type - Parameter.TYPE_BOOL;
 			type.addEventListener(IndexChangeEvent.CHANGING,function(e:IndexChangeEvent):void{
 				param.type = type.selectedItem.id;
+				updateTransitionInspector(m_curArrow);
 			});
 			var remove:Image = new Image();
 			remove.source = "assets/-.png";
 			remove.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void{
 				EditController.getInstance().removeParam(param);
 				m_paramList.removeElement(hGroup);
+				updateTransitionInspector(m_curArrow);
 			});
 			hGroup.addElement(input);
 			hGroup.addElement(type);
