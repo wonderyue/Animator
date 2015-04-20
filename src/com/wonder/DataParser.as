@@ -112,11 +112,11 @@ package com.wonder
 			fs.close();
 			
 			var type:int;
-			if (file.name.indexOf("_fsm.json") != -1) 
+			if (file.name.indexOf("fsm.json") != -1) 
 			{
 				type = FILETYPE_FSM;
 			}
-			else if (file.name.indexOf("_skeleton.json") != -1) 
+			else if (file.name.indexOf("skeleton.json") != -1) 
 			{
 				type = FILETYPE_SKELETON;
 			}
@@ -129,7 +129,7 @@ package com.wonder
 					var stateStrArr:Array = new Array();
 					for each (var ani:Object in obj["armature"][0]["animation"]) 
 					{
-						stateStrArr.push(ani["name"]);
+						stateStrArr.push({"state":ani["name"],"animation":ani["name"]});
 					}
 					if (isAppend) 
 					{
