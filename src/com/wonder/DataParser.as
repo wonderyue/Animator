@@ -158,7 +158,7 @@ package com.wonder
 					{
 						if (oneStateObj["state"] != AnimState.ANYSTATE_ID) 
 						{
-							stateStrArray.push({"state":oneStateObj["state"],"animation":oneStateObj["animation"]});
+							stateStrArray.push({"state":oneStateObj["state"],"animation":oneStateObj["animation"],"default":oneStateObj["default"]});
 						}
 					}
 					EditController.getInstance().initStates(stateStrArray,file.name.split(".")[0]);

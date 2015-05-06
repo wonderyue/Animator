@@ -154,11 +154,14 @@ package com.wonder
 				{
 					var stateName:String = input[i]["state"];
 					var animation:String = input[i]["animation"];
+					var isDefault:Boolean = input[i]["default"];
 					var state:AnimState = addState(stateName, m_editLayer.width / 2 - 200 + 250*Math.cos(i/input.length*Math.PI-Math.PI*0.75), m_editLayer.height / 2 + 250*Math.sin(i/input.length*Math.PI-Math.PI*0.75));
 					state.animation = animation;
+					if(isDefault){
+						setDefaultState(state);
+					}
 				}
 				var anyState:AnimState = addState(AnimState.ANYSTATE_ID, m_editLayer.width / 7 * 3, m_editLayer.height / 2);
-				setDefaultState(AnimState(m_stateArray[0]));
 			}
 			m_paramArray = new Array();
 			m_paramArray.push(new Parameter(Parameter.COMPLETE_ID, Parameter.TYPE_COMPLETE));

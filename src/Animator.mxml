@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
@@ -86,8 +85,8 @@
 			import fl.containers.ScrollPane;
 			private var m_scrollLayer:ScrollPane;
 			private var m_scrollContent:Sprite;
-			private static var MAX_WIDTH:int = 2000;
-			private static var MAX_HEIGHT:int = 2000;
+			private static var MAX_WIDTH:int = 1920*2;
+			private static var MAX_HEIGHT:int = 1080*2;
 
 			public function get editLayer():Sprite
 			{
@@ -139,6 +138,8 @@
 				addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER,onDragIn);
 				addEventListener(NativeDragEvent.NATIVE_DRAG_DROP,onDragDrop);
 				
+				zoomSlider.mouseFocusEnabled = false;
+				
 				new EditController(this);
 			}
 
@@ -183,6 +184,7 @@
 				m_scrollLayer.update();
 				m_scrollLayer.verticalScrollPosition = m_scrollLayer.maxVerticalScrollPosition*perX;
 				m_scrollLayer.horizontalScrollPosition = m_scrollLayer.maxHorizontalScrollPosition*perY;
+				m_scrollLayer.update();
 			}
 			
 			private function onAdd():void
