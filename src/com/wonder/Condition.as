@@ -3,8 +3,6 @@ package com.wonder
 	public class Condition
 	{
 		private var m_parameter:Parameter;
-		private var m_id:String = null;
-		private var m_type:int = 0;
 		private var m_value:int = 0;
 		private var m_logic:int = 0;
 		
@@ -26,28 +24,26 @@ package com.wonder
 		public function set parameter(value:Parameter):void
 		{
 			m_parameter = value;
-			m_id = m_parameter.id;
-			m_type = m_parameter.type;
 		}
 
 		public function get id():String
 		{
-			return m_id;
+			return m_parameter.id;
 		}
 
 		public function set id(value:String):void
 		{
-			m_id = value;
+			m_parameter.id = value;
 		}
 
 		public function get type():int
 		{
-			return m_type;
+			return m_parameter.type;
 		}
 
 		public function set type(value:int):void
 		{
-			m_type = value;
+			m_parameter.type = value;
 		}
 
 		public function get value():int

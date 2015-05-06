@@ -2,13 +2,11 @@ package com.wonder
 {
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
-	import flash.events.TextEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
-	import mx.core.UIComponent;
 	
 	import spark.components.Button;
 	import spark.components.DropDownList;
@@ -45,7 +43,6 @@ package com.wonder
 		private var m_paramList:VGroup;
 		private var m_paramScroller:Scroller;
 		private var m_paramPanel:Panel;
-		private var m_completeParam:Parameter;
 		private var m_armatureInfo:Object;
 
 		public static function getInstance():EditController
@@ -142,7 +139,7 @@ package com.wonder
 		public function initStates(input:Array = null,skeletonName:String = "fsm"):void
 		{
 			m_skeletonName = skeletonName;
-			m_editLayer.removeChildren()
+			m_editLayer.removeChildren();
 			m_inspector.removeAllElements();
 			m_paramList.removeAllElements();
 			m_stateArray = new Array();
@@ -164,8 +161,7 @@ package com.wonder
 				setDefaultState(AnimState(m_stateArray[0]));
 			}
 			m_paramArray = new Array();
-			m_completeParam = new Parameter(Parameter.COMPLETE_ID, Parameter.TYPE_COMPLETE)
-			m_paramArray.push(m_completeParam);
+			m_paramArray.push(new Parameter(Parameter.COMPLETE_ID, Parameter.TYPE_COMPLETE));
 		}
 		
 		public function addStates(input:Array):void
@@ -192,11 +188,6 @@ package com.wonder
 			return m_paramArray;
 		}
 		
-		public function get completeParam():Parameter
-		{
-			return m_completeParam;
-		}
-
 		public function get stateArray():Array
 		{
 			return m_stateArray;

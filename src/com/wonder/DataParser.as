@@ -127,18 +127,23 @@ package com.wonder
 				{
 					var obj:Object = JSON.parse(content);
 					var stateStrArr:Array = new Array();
+					var animationArr:Array = new Array();
 					for each (var ani:Object in obj["armature"][0]["animation"]) 
 					{
 						stateStrArr.push({"state":ani["name"],"animation":ani["name"]});
+						if (animationArr.indexOf(ani["name"]) == -1) 
+						{
+							animationArr.push(ani["name"]);
+						}
 					}
 					if (isAppend) 
 					{
 						EditController.getInstance().addStates(stateStrArr);
-						EditController.getInstance().armatureInfo[obj["armature"][0]["name"]] = stateStrArr;
+						EditController.getInstance().armatureInfo[obj["armature"][0]["name"]] = animationArr;
 					}else{
 						EditController.getInstance().initStates(stateStrArr,obj["armature"][0]["name"]);
 						EditController.getInstance().armatureInfo = new Object();
-						EditController.getInstance().armatureInfo[obj["armature"][0]["name"]] = stateStrArr;
+						EditController.getInstance().armatureInfo[obj["armature"][0]["name"]] = animationArr;
 					}
 					break;
 				}

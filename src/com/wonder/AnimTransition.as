@@ -52,7 +52,7 @@ package com.wonder
 
 		public function addCondition():Condition
 		{
-			var condition:Condition = new Condition(EditController.getInstance().completeParam);
+			var condition:Condition = new Condition(new Parameter(Parameter.COMPLETE_ID, Parameter.TYPE_COMPLETE));
 			m_conditionArray.push(condition);
 			return condition;
 		}
