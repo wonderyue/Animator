@@ -60,6 +60,9 @@
 			<s:BorderContainer id="btnPanel" width="100%" height="60" cornerRadius="10">
 				<s:HGroup x="0" y="0" width="100%" height="100%" paddingBottom="10"
 						  paddingLeft="10" paddingRight="10" paddingTop="10">
+					<s:Button id="resetBtn" width="98" height="40" label="reset" click="onReset()"
+							  fontFamily="Courier New" fontSize="12" fontWeight="normal">
+					</s:Button>
 					<s:Button id="openBtn" width="98" height="40" label="open" click="onOpen()"
 							  fontFamily="Courier New" fontSize="12" fontWeight="normal" 
 							  toolTip="Files support: &#13; 1.*_fsm.json exported by this editor &#13; 2.*_skeleton.json for Egret Engine(support multiple files)">
@@ -164,6 +167,11 @@
 				m_scrollLayer.width = borderContainer.width;
 				m_scrollLayer.height = borderContainer.height;
 				m_scrollLayer.update();
+			}
+			
+			private function onReset():void
+			{
+				EditController.getInstance().reset();
 			}
 			
 			private function onSave():void

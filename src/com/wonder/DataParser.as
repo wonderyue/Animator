@@ -99,12 +99,12 @@ package com.wonder
 				for (var i:int = 0; i < files.length; i++)
 				{
 					var file:File = files[i];
-					parseSingleFile(file, i>0);
+					parseSingleFile(file);
 				}
 			}
 		}
 		
-		private static function parseSingleFile(file:File, isAppend:Boolean=false):void
+		private static function parseSingleFile(file:File):void
 		{
 			var fs:FileStream = new FileStream(); 
 			fs.open(File(file),FileMode.READ); 
@@ -136,15 +136,8 @@ package com.wonder
 							animationArr.push(ani["name"]);
 						}
 					}
-					if (isAppend) 
-					{
-						EditController.getInstance().addStates(stateStrArr);
-						EditController.getInstance().armatureInfo[obj["armature"][0]["name"]] = animationArr;
-					}else{
-						EditController.getInstance().initStates(stateStrArr,obj["armature"][0]["name"]);
-						EditController.getInstance().armatureInfo = new Object();
-						EditController.getInstance().armatureInfo[obj["armature"][0]["name"]] = animationArr;
-					}
+					EditController.getInstance().addStates(stateStrArr);
+					EditController.getInstance().armatureInfo[obj["armature"][0]["name"]] = animationArr;
 					break;
 				}
 				case FILETYPE_FSM:

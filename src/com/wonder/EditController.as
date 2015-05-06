@@ -76,6 +76,7 @@ package com.wonder
 				var element:AnimState = m_stateArray[i] as AnimState;
 				if (id == element.id) 
 				{
+					Alert.show("State Already Exists!");
 					return true;
 				}
 			}
@@ -86,7 +87,7 @@ package com.wonder
 		{
 			if (id.indexOf("Untitled") == -1) 
 			{
-				return id;
+				return checkStateIdExist(id)?id+"(new)":id;
 			}
 			var max:int = -1;
 			for (var i:int = 0; i < m_stateArray.length; i++)
@@ -136,9 +137,8 @@ package com.wonder
 			}
 		}
 		
-		public function initStates(input:Array = null,skeletonName:String = "fsm"):void
+		public function reset():void
 		{
-			m_skeletonName = skeletonName;
 			m_editLayer.removeChildren();
 			m_inspector.removeAllElements();
 			m_paramList.removeAllElements();
@@ -148,6 +148,15 @@ package com.wonder
 			m_curArrow = null;
 			m_curState = null;
 			m_editLayer.addChild(m_arrowContainer);
+			m_paramArray = new Array();
+			m_paramArray.push(new Parameter(Parameter.COMPLETE_ID, Parameter.TYPE_COMPLETE));
+			m_armatureInfo = new Object();
+		}
+		
+		public function initStates(input:Array = null,skeletonName:String = "fsm"):void
+		{
+			reset();
+			m_skeletonName = skeletonName;
 			if (input && input.length > 0) 
 			{
 				for (var i:int = 0; i < input.length; i++) 
@@ -163,8 +172,6 @@ package com.wonder
 				}
 				var anyState:AnimState = addState(AnimState.ANYSTATE_ID, m_editLayer.width / 7 * 3, m_editLayer.height / 2);
 			}
-			m_paramArray = new Array();
-			m_paramArray.push(new Parameter(Parameter.COMPLETE_ID, Parameter.TYPE_COMPLETE));
 		}
 		
 		public function addStates(input:Array):void
